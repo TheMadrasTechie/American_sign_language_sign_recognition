@@ -11,6 +11,9 @@ https://www.youtube.com/watch?v=doDUihpj6ro
 Here is the link for the Dataset.
 https://www.kaggle.com/datasets/sundarbalamurugan/hand-gestures-using-mediapipe
 
+Here is the youtube video link of my working.
+https://youtu.be/IJsWkrfR_s8
+
 They are numpy arrays of all the gestures stored.
 Thet are of 4 different people.
 2 - Man
