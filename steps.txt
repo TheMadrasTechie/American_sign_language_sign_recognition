@@ -1,0 +1,3 @@
+conda create -n asl python=3.10 -y
+conda activate asl
+pip install mediapipe==0.10.9 opencv-python tensorflow scikit-learn
