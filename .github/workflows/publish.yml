@@ -1,0 +1,96 @@
+name: Publish to PyPI (conditional on commit message)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      run_ci: ${{ steps.check.outputs.run_ci }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Check commit message pattern
+        id: check
+        run: |
+          msg="${{ github.event.head_commit.message }}"
+          echo "Last commit message: $msg"
+
+          if [[ "$msg" =~ ^([0-9]+)-([0-9]+)-([0-9]+) ]]; then
+            VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+            echo "run_ci=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "Commit matches pattern. Version will be: $VERSION"
+          else
+            echo "run_ci=false" >> "$GITHUB_OUTPUT"
+            echo "version=" >> "$GITHUB_OUTPUT"
+            echo "Commit does NOT match N-N-N pattern, skipping publish."
+          fi
+
+  build-and-publish:
+    needs: check-commit
+    if: needs.check-commit.outputs.run_ci == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true          # fetch the model if it's stored via Git LFS (harmless otherwise)
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Update version in pyproject.toml
+        run: |
+          VERSION="${{ needs.check-commit.outputs.version }}"
+          echo "Setting version to: $VERSION"
+          sed -i "s/^version = \"[^\"]*\"/version = \"$VERSION\"/" pyproject.toml
+          grep "^version" pyproject.toml
+
+      - name: Confirm model is present before building
+        run: |
+          MODEL="src/asl_alphabet/models/alphabet_30_30_all_4.h5"
+          if [ ! -f "$MODEL" ]; then
+            echo "ERROR: bundled model missing at $MODEL — wheel would be broken."
+            ls -la src/asl_alphabet/models/ || true
+            exit 1
+          fi
+          echo "Model found: $(du -h "$MODEL" | cut -f1)"
+
+      - name: Clean old build artifacts
+        run: rm -rf dist/ build/ *.egg-info/ src/*.egg-info/
+
+      - name: Build package
+        run: python -m build
+
+      - name: Verify model is inside the built wheel
+        run: |
+          WHL=$(ls dist/*.whl)
+          echo "Inspecting $WHL"
+          python -c "
+          import zipfile
+          whl = '$WHL'
+          with zipfile.ZipFile(whl) as z:
+              names = z.namelist()
+              meta = [f for f in names if f.endswith('METADATA')][0]
+              print(z.read(meta).decode()[:800])
+              has_model = any(n.endswith('.h5') for n in names)
+              print('\n--- .h5 bundled in wheel:', has_model, '---')
+              assert has_model, 'Model .h5 not found in wheel!'
+          "
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: python -m twine upload --non-interactive dist/*
