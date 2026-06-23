@@ -1,27 +1,83 @@
-# American_sign_language_sign_recognition
-This is a jupyter notebook program to train and detect the hand gestures of american signlanguage using LSTM and Mediapipe.
+# signspell
 
-I used tutorials from **Nicholas Renotte**
-Here's his youtube channel: https://www.youtube.com/c/NicholasRenotte
+**Live ASL fingerspelling alphabet recognition — straight from your webcam.**
 
-You can find the tutorial that I used to create the gesture detection in the following video.
+`signspell` recognises the American Sign Language manual alphabet (A–Z) in real
+time using MediaPipe hand tracking and an LSTM model trained on 30-frame
+keypoint sequences. It ships with a pretrained model and a polished webcam UI,
+and it works both as a command-line tool and an importable library.
 
-https://www.youtube.com/watch?v=doDUihpj6ro
+---
 
-Here is the link for the Dataset.
-https://www.kaggle.com/datasets/sundarbalamurugan/hand-gestures-using-mediapipe
+## Install
 
-Here is the youtube video link of my working.
-https://youtu.be/IJsWkrfR_s8
+```bash
+pip install signspell
+```
 
-They are numpy arrays of all the gestures stored.
-Thet are of 4 different people.
-2 - Man
-1 - Woman
-1 - Kid
+> Requires Python 3.9–3.11. A webcam is required for live recognition.
 
-## Paper
-Here is the link to the paper -  https://www.sciencedirect.com/science/article/pii/S1877050922021378
-In the future, I will try to create a blog post and share it.
+## Run it (CLI)
 
+```bash
+signspell                  # default webcam, bundled model, pro UI
+signspell --camera 1       # pick a different camera
+signspell --threshold 0.6  # require higher confidence
+signspell --no-mirror      # disable mirrored view
+```
 
+**In-window keys:** `q` quit · `c` clear sentence · `SPACE` add a space.
+
+## Use it (library)
+
+Run the full UI from code:
+
+```python
+import signspell
+signspell.run()
+```
+
+Or drive recognition yourself, frame by frame:
+
+```python
+import cv2
+import signspell
+
+rec = signspell.Recognizer()
+cap = cv2.VideoCapture(0)
+
+while True:
+    ok, frame = cap.read()
+    if not ok:
+        break
+    letter, confidence, probs = rec.predict(frame)
+    if letter:
+        print(letter, f"{confidence:.2f}")
+```
+
+The `Recognizer` keeps a rolling 30-frame buffer internally, so you just feed
+frames and read predictions. `letter` is `None` until the buffer fills or when
+confidence is below the threshold.
+
+## How it works
+
+1. **MediaPipe Holistic** extracts 21 right-hand landmarks per frame.
+2. The last **30 frames** of `(x, y, z)` keypoints form a sequence.
+3. An **LSTM** classifies the sequence into one of 26 letters.
+4. A short stability window prevents flicker before a letter is committed.
+
+## Bring your own model
+
+```bash
+signspell --model path/to/your_model.h5
+```
+
+```python
+signspell.Recognizer(model_path="path/to/your_model.h5")
+```
+
+Your model must accept input shape `(1, 30, 63)` and output 26 class scores.
+
+## License
+
+MIT © Sundar
