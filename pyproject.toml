@@ -34,7 +34,7 @@ dependencies = [
     #   - opencv/numpy are left to resolve against TF 2.19's numpy.
     "numpy>=1.26",
     "opencv-python>=4.8",
-    "mediapipe>=0.10.14,<0.11",
+    "mediapipe==0.10.18",
     "tensorflow>=2.19,<2.20",
 ]
 
