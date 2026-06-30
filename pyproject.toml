@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "signspell"
-version = "1.0.1"
+version = "2.0.0"
 description = "Live ASL fingerspelling alphabet recognition with a polished webcam UI."
 readme = "README.md"
-requires-python = ">=3.9,<3.12"
+requires-python = ">=3.9,<3.13"
 license = { text = "MIT" }
 authors = [{ name = "Sundar", email = "sundarbala36663@gmail.com" }]
 keywords = ["asl", "sign-language", "computer-vision", "mediapipe", "fingerspelling", "accessibility"]
@@ -20,18 +20,22 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Image Recognition",
     "Topic :: Multimedia :: Video :: Capture",
 ]
 dependencies = [
-    # Pinned as one tested set. These four have tight binary (ABI) coupling:
-    # TF 2.15 + ml_dtypes need numpy<2; mediapipe>=0.10.10 drops the
-    # solutions API (Holistic); opencv>=4.10 forces numpy>=2. Loosening any
-    # of these re-introduces the import crashes, so they stay exact.
-    "numpy>=1.26,<2",
-    "opencv-python>=4.8,<4.10",
-    "mediapipe==0.10.9",
-    "tensorflow==2.15.1",
+    # Model is now trained natively on TF 2.19, which unwinds the old
+    # TF-2.15 / Keras-2 / numpy<2 lock. TF 2.19 brings its own Keras 3 and
+    # works with numpy 2, so the ranges can breathe again. Two constraints
+    # still matter:
+    #   - mediapipe must keep the legacy `solutions` API (Holistic), which
+    #     was removed after 0.10.x; 0.10.18 has it AND supports Python 3.12.
+    #   - opencv/numpy are left to resolve against TF 2.19's numpy.
+    "numpy>=1.26",
+    "opencv-python>=4.8",
+    "mediapipe>=0.10.14,<0.11",
+    "tensorflow>=2.19,<2.20",
 ]
 
 [project.urls]

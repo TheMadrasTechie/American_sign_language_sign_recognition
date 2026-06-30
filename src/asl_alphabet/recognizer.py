@@ -46,7 +46,10 @@ class Recognizer:
         from tensorflow.keras.models import load_model
 
         self.threshold = threshold
-        self._model = load_model(model_path or default_model_path())
+        # Model trained on TF 2.19 / Keras 3. compile=False loads only the
+        # inference graph (no optimizer state needed) and avoids Keras 3
+        # warnings about missing training config.
+        self._model = load_model(model_path or default_model_path(), compile=False)
 
         self._mp_holistic = mp.solutions.holistic
         self._holistic = self._mp_holistic.Holistic(

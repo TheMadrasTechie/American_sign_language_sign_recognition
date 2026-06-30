@@ -59,7 +59,7 @@ jobs:
 
       - name: Confirm model is present before building
         run: |
-          MODEL="src/asl_alphabet/models/alphabet_30_30_all_4.h5"
+          MODEL="src/asl_alphabet/models/alphabet_model.h5"
           if [ ! -f "$MODEL" ]; then
             echo "ERROR: bundled model missing at $MODEL — wheel would be broken."
             ls -la src/asl_alphabet/models/ || true

@@ -15,7 +15,7 @@ DEFAULT_THRESHOLD = 0.5
 STABILITY_WINDOW = 10         # consecutive agreeing frames before a letter sticks
 
 # Bundled model filename (lives in asl_alphabet/models/)
-MODEL_FILENAME = "alphabet_30_30_all_4.h5"
+MODEL_FILENAME = "alphabet_model.h5"
 
 
 def default_model_path() -> str:

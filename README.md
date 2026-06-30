@@ -7,6 +7,10 @@ time using MediaPipe hand tracking and an LSTM model trained on 30-frame
 keypoint sequences. It ships with a pretrained model and a polished webcam UI,
 and it works both as a command-line tool and an importable library.
 
+![ASL fingerspelling alphabet chart](alphabets/signspell_asl_chart.png)
+
+*The American Sign Language fingerspelling alphabet that signspell recognises.*
+
 ---
 
 ## Install
@@ -15,7 +19,7 @@ and it works both as a command-line tool and an importable library.
 pip install signspell
 ```
 
-> Requires Python 3.9–3.11. A webcam is required for live recognition.
+> Requires Python 3.9–3.12. A webcam is required for live recognition.
 
 ## Run it (CLI)
 
