@@ -1,0 +1,10 @@
+1. Walking
+2. Sitting
+3. Standing
+4. Running
+5. Bending
+6. Kicking
+7. Waving
+8. Clapping
+9. Drinking
+10. Jumping
