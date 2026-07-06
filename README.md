@@ -1,7 +1,8 @@
 # signspell
 
-**Live ASL fingerspelling alphabet recognition — straight from your webcam.**
 
+**Live ASL fingerspelling alphabet recognition — straight from your webcam.**
+[![Downloads](https://static.pepy.tech/badge/signspell)](https://pepy.tech/project/signspell)
 `signspell` recognises the American Sign Language manual alphabet (A–Z) in real
 time using MediaPipe hand tracking and an LSTM model trained on 30-frame
 keypoint sequences. It ships with a pretrained model and a polished webcam UI,
